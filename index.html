@@ -1,0 +1,775 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f0c1d">
+<title>Practice Studio – บันทึกการซ้อมดนตรี</title>
+<style>
+:root{
+  --bg:#0f0c1d; --bg2:#171230; --card:rgba(255,255,255,.06); --card-solid:#1a1535; --line:rgba(255,255,255,.1);
+  --text:#f4f1ff; --muted:#a39dc4; --accent:#8b6bff; --accent2:#ff5fa2; --good:#34d399; --warn:#fbbf24; --danger:#ff6b6b;
+  --grad:linear-gradient(135deg,#8b6bff 0%,#ff5fa2 100%);
+  --bar:rgba(139,107,255,.45); --shadow:0 10px 40px rgba(0,0,0,.35); --input:rgba(255,255,255,.07);
+}
+:root[data-theme="light"]{
+  --bg:#f5f3ff; --bg2:#ece8ff; --card:rgba(255,255,255,.85); --card-solid:#ffffff; --line:rgba(70,50,140,.12);
+  --text:#1f1a3a; --muted:#6c658f; --bar:rgba(139,107,255,.4); --shadow:0 10px 36px rgba(80,60,160,.12); --input:#f1eeff;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{
+  font-family:"Noto Sans Thai",system-ui,-apple-system,"Segoe UI",sans-serif; color:var(--text); line-height:1.55;
+  background:
+    radial-gradient(600px 400px at 90% -5%,rgba(255,95,162,.22),transparent 60%),
+    radial-gradient(700px 500px at -10% 10%,rgba(139,107,255,.28),transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+.hidden{display:none!important}
+
+/* ---------- layout ---------- */
+.app{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1fr;min-height:100vh}
+.side{display:none}
+.main{padding:calc(18px + env(safe-area-inset-top)) 18px calc(104px + env(safe-area-inset-bottom));min-width:0}
+@media(min-width:900px){
+  .app{grid-template-columns:230px 1fr;gap:12px}
+  .side{display:flex;flex-direction:column;gap:6px;padding:28px 12px;position:sticky;top:0;height:100vh}
+  .main{padding:28px 24px 48px}
+  .bottom{display:none!important}
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.1rem;margin:0 8px 22px}
+.logo{width:40px;height:40px;border-radius:13px;background:var(--grad);display:grid;place-items:center;font-size:20px;box-shadow:0 8px 24px rgba(139,107,255,.45)}
+.nav-btn{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;border:0;background:transparent;color:var(--muted);cursor:pointer;font-weight:600;text-align:left;width:100%}
+.nav-btn:hover{background:var(--card)}
+.nav-btn.active{background:var(--card);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
+.nav-btn .ic{font-size:1.2rem}
+.bottom{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:20;display:flex;justify-content:space-around;
+  padding:8px;border-radius:24px;background:var(--card-solid);border:1px solid var(--line);box-shadow:var(--shadow);backdrop-filter:blur(16px);max-width:520px;margin:0 auto}
+.bottom .nav-btn{flex-direction:column;gap:2px;padding:8px 6px;font-size:.72rem;text-align:center;justify-content:center;align-items:center;width:auto;flex:1}
+.bottom .nav-btn.active{background:var(--grad);color:#fff;box-shadow:0 6px 18px rgba(139,107,255,.4)}
+
+/* ---------- common ---------- */
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+.hello small{color:var(--muted);display:block;font-size:.82rem}
+.hello h1{margin:0;font-size:1.5rem;line-height:1.25;font-weight:800}
+.avatar{width:46px;height:46px;border-radius:16px;background:var(--grad);display:grid;place-items:center;font-size:1.4rem;flex:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:20px;box-shadow:var(--shadow);backdrop-filter:blur(14px)}
+.card + .card{margin-top:16px}
+.card h2{margin:0 0 14px;font-size:1.02rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.section-sub{color:var(--muted);font-size:.85rem;margin:-8px 0 14px}
+label.f{display:block;font-size:.8rem;color:var(--muted);margin:14px 0 6px;font-weight:500}
+.inp,select.inp,textarea.inp{width:100%;padding:13px 15px;border-radius:14px;border:1px solid var(--line);background:var(--input);outline:none;font-size:.97rem}
+.inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(139,107,255,.25)}
+textarea.inp{resize:vertical;min-height:78px}
+select.inp option{color:#222}
+.btn{border:0;border-radius:16px;padding:14px 20px;font-weight:700;cursor:pointer;background:var(--grad);color:#fff;box-shadow:0 10px 26px rgba(139,107,255,.38);transition:transform .08s,opacity .2s}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.btn.ghost{background:var(--card);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
+.btn.danger{background:rgba(255,107,107,.15);color:var(--danger);box-shadow:inset 0 0 0 1px rgba(255,107,107,.35)}
+.btn.block{width:100%}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row>*{flex:1;min-width:140px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--input);padding:9px 14px;border-radius:999px;cursor:pointer;font-size:.9rem;font-weight:500;display:inline-flex;gap:6px;align-items:center;user-select:none}
+.chip.on{background:var(--grad);border-color:transparent;color:#fff;font-weight:700}
+.chip .x{opacity:.7;margin-left:2px}
+.muted{color:var(--muted)}
+
+/* ---------- onboarding ---------- */
+#onboard{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:calc(20px + env(safe-area-inset-top)) 18px 20px}
+.ob-card{width:100%;max-width:520px}
+.dots{display:flex;gap:6px;margin-bottom:18px}
+.dots i{height:5px;flex:1;border-radius:3px;background:var(--line)}
+.dots i.on{background:var(--grad)}
+.ob-hero{font-size:3rem;margin-bottom:6px}
+.ob-card h1{margin:0 0 6px;font-size:1.65rem;font-weight:800;line-height:1.25}
+.ob-card p{margin:0 0 6px;color:var(--muted)}
+.inst-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px}
+@media(min-width:460px){.inst-grid{grid-template-columns:repeat(4,1fr)}}
+.inst{border:1px solid var(--line);background:var(--input);border-radius:18px;padding:14px 4px 10px;text-align:center;cursor:pointer;font-size:.8rem;font-weight:600;transition:.15s;user-select:none}
+.inst b{display:block;font-size:1.7rem;margin-bottom:2px;font-weight:400}
+.inst.on{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 8px 22px rgba(139,107,255,.4);transform:translateY(-2px)}
+.ob-actions{display:flex;gap:10px;margin-top:22px}
+.ob-actions .btn{flex:1}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.seg .chip{justify-content:center;border-radius:14px;padding:12px 6px}
+.goal-pick{display:flex;align-items:center;justify-content:center;gap:18px;margin:10px 0}
+.goal-pick .big{font-size:3rem;font-weight:800;min-width:110px;text-align:center;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.round{width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:var(--input);font-size:1.4rem;cursor:pointer}
+
+/* ---------- practice ---------- */
+.ring-wrap{position:relative;width:min(300px,78vw);aspect-ratio:1;margin:6px auto 4px}
+.ring-wrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring-bg{stroke:var(--line)}
+.ring-fg{stroke:url(#rg);transition:stroke-dashoffset .4s}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.clock{font-size:2.8rem;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.01em;line-height:1.1}
+.clock.run{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ring-center small{color:var(--muted);font-size:.8rem;margin-top:4px}
+.pulse{animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.55}}
+.plan-box{background:var(--input);border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin-top:10px}
+.plan-box small{color:var(--muted);display:block;font-size:.76rem;margin-bottom:2px}
+.plan-box p{margin:0 0 10px;font-weight:500;white-space:pre-wrap}
+.plan-box p:last-child{margin:0}
+.ctrl{display:flex;gap:12px;margin-top:16px}
+.ctrl .btn{flex:1;padding:16px}
+.today-strip{display:flex;gap:10px;margin-bottom:16px}
+.mini{flex:1;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 14px}
+.mini b{display:block;font-size:1.25rem;line-height:1.2}
+.mini span{font-size:.74rem;color:var(--muted)}
+
+/* ---------- sheet (reflection) ---------- */
+.overlay{position:fixed;inset:0;background:rgba(5,3,15,.65);backdrop-filter:blur(6px);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+@media(min-width:700px){.overlay{align-items:center}}
+.sheet{width:100%;max-width:560px;max-height:92vh;overflow:auto;background:var(--card-solid);border:1px solid var(--line);border-radius:28px 28px 0 0;padding:22px 20px calc(22px + env(safe-area-inset-bottom));animation:up .28s ease}
+@media(min-width:700px){.sheet{border-radius:28px}}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+.sheet h2{margin:0 0 2px;font-size:1.3rem;font-weight:800}
+.recap{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 4px}
+.recap .mini{min-width:110px}
+.faces{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.face{border:1px solid var(--line);background:var(--input);border-radius:16px;padding:10px 2px;text-align:center;cursor:pointer;font-size:1.6rem;line-height:1.1}
+.face small{display:block;font-size:.66rem;color:var(--muted);margin-top:4px}
+.face.on{background:var(--grad);border-color:transparent;transform:translateY(-2px)}
+.face.on small{color:#fff}
+
+/* ---------- summary ---------- */
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}
+@media(min-width:700px){.stat-grid{grid-template-columns:repeat(4,1fr)}}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px}
+.stat .e{font-size:1.3rem}
+.stat b{display:block;font-size:1.55rem;font-weight:800;line-height:1.2;margin-top:4px}
+.stat span{font-size:.78rem;color:var(--muted)}
+.chart-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.legend{display:flex;gap:14px;font-size:.76rem;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.chart-box{position:relative}
+#chart{width:100%;height:auto;display:block}
+.tip{position:absolute;pointer-events:none;background:var(--text);color:var(--bg);padding:7px 11px;border-radius:10px;font-size:.78rem;white-space:nowrap;transform:translate(-50%,-110%);opacity:0;transition:opacity .12s;z-index:5}
+.tbl-wrap{overflow-x:auto;margin:0 -6px;padding:0 6px}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+tfoot td{font-weight:700;border-top:1px solid var(--line);border-bottom:0}
+.t-right{text-align:right}
+.pbar{height:8px;border-radius:5px;background:var(--line);overflow:hidden;min-width:90px}
+.pbar i{display:block;height:100%;border-radius:5px;background:var(--grad)}
+.pbar.ok i{background:var(--good)}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.74rem;background:var(--input);border:1px solid var(--line);white-space:nowrap}
+.cell-txt{min-width:150px;max-width:260px;white-space:pre-wrap;word-break:break-word}
+.del{border:0;background:transparent;color:var(--muted);cursor:pointer;padding:4px 8px;border-radius:8px;font-size:1rem}
+.del:hover{color:var(--danger);background:var(--input)}
+.empty{text-align:center;color:var(--muted);padding:26px 8px}
+.empty b{display:block;font-size:2rem;margin-bottom:4px;font-weight:400}
+
+.toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(16px);background:var(--text);color:var(--bg);padding:11px 18px;border-radius:14px;font-size:.88rem;font-weight:600;opacity:0;transition:.25s;z-index:99;pointer-events:none;max-width:90vw;text-align:center}
+@media(min-width:900px){.toast{bottom:30px}}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- ================= ONBOARDING ================= -->
+<div id="onboard" class="hidden">
+  <div class="card ob-card">
+    <div class="dots" id="obDots"><i></i><i></i><i></i></div>
+
+    <div class="ob-step" data-step="0">
+      <div class="ob-hero">🎶</div>
+      <h1>ยินดีต้อนรับสู่<br>Practice Studio</h1>
+      <p>ตั้งค่าเริ่มต้นสั้น ๆ ก่อนเริ่มซ้อม ใช้เวลาไม่ถึงนาที</p>
+      <label class="f" for="obName">ให้เรียกคุณว่าอะไรดี</label>
+      <input class="inp" id="obName" maxlength="24" placeholder="ชื่อเล่นของคุณ" autocomplete="nickname">
+    </div>
+
+    <div class="ob-step hidden" data-step="1">
+      <div class="ob-hero">🎸</div>
+      <h1>คุณเล่นเครื่องดนตรีอะไร</h1>
+      <p>เลือกได้มากกว่า 1 อย่าง และเพิ่มเองได้</p>
+      <div class="inst-grid" id="obInst"></div>
+      <label class="f" for="obCustom">เครื่องดนตรีอื่น ๆ</label>
+      <div class="row" style="flex-wrap:nowrap">
+        <input class="inp" id="obCustom" maxlength="24" placeholder="เช่น ขลุ่ย, ระนาด">
+        <button class="btn ghost" id="obAdd" style="flex:none;min-width:0">เพิ่ม</button>
+      </div>
+      <label class="f">ระดับของคุณตอนนี้</label>
+      <div class="seg" id="obLevel"></div>
+    </div>
+
+    <div class="ob-step hidden" data-step="2">
+      <div class="ob-hero">🎯</div>
+      <h1>ตั้งเป้าหมายการซ้อม</h1>
+      <p>ซ้อมวันละกี่นาทีถึงจะรู้สึกว่า “วันนี้ทำได้แล้ว”</p>
+      <div class="goal-pick">
+        <button class="round" data-g="-5" aria-label="ลด">−</button>
+        <div class="big"><span id="obGoal">30</span><div style="font-size:.9rem;font-weight:600;-webkit-text-fill-color:var(--muted)">นาที / วัน</div></div>
+        <button class="round" data-g="5" aria-label="เพิ่ม">+</button>
+      </div>
+      <div class="chips" style="justify-content:center;margin-top:10px" id="obGoalQuick"></div>
+    </div>
+
+    <div class="ob-actions">
+      <button class="btn ghost hidden" id="obBack">ย้อนกลับ</button>
+      <button class="btn" id="obNext">ถัดไป</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div class="app hidden" id="app">
+  <aside class="side">
+    <div class="brand"><div class="logo">♪</div>Practice Studio</div>
+    <button class="nav-btn" data-nav="practice"><span class="ic">🎧</span>ซ้อม</button>
+    <button class="nav-btn" data-nav="summary"><span class="ic">📊</span>สรุปผล 7 วัน</button>
+    <button class="nav-btn" data-nav="profile"><span class="ic">👤</span>โปรไฟล์</button>
+  </aside>
+
+  <main class="main">
+    <!-- ===== PRACTICE ===== -->
+    <section id="v-practice" class="view">
+      <div class="top">
+        <div class="hello"><small id="dateLabel"></small><h1 id="helloTxt"></h1></div>
+        <div class="avatar" id="avatar">🎵</div>
+      </div>
+
+      <div class="today-strip">
+        <div class="mini"><b id="tToday">0 น.</b><span>ซ้อมวันนี้</span></div>
+        <div class="mini"><b id="tGoal">30 น.</b><span>เป้าหมาย</span></div>
+        <div class="mini"><b id="tStreak">0 🔥</b><span>วันติดต่อกัน</span></div>
+      </div>
+
+      <!-- idle: plan form -->
+      <div class="card" id="planCard">
+        <h2>📝 วางแผนก่อนซ้อม</h2>
+        <p class="section-sub">เขียนให้ชัดว่าจะซ้อมอะไร และหวังอะไร เวลาจะเริ่มเดินเมื่อกดปุ่มเริ่ม</p>
+        <label class="f" for="pInst">เครื่องดนตรี</label>
+        <select class="inp" id="pInst"></select>
+        <label class="f" for="pPlan">วันนี้จะซ้อมอะไร <span style="color:var(--accent2)">*</span></label>
+        <textarea class="inp" id="pPlan" maxlength="240" placeholder="เช่น สเกล C Major 10 นาที + เพลง Blackbird ท่อน Verse"></textarea>
+        <label class="f" for="pBenefit">ประโยชน์ที่คาดว่าจะได้รับ <span style="color:var(--accent2)">*</span></label>
+        <textarea class="inp" id="pBenefit" maxlength="240" placeholder="เช่น นิ้วคล่องขึ้น เปลี่ยนคอร์ดได้เร็วขึ้น จำเพลงได้ครบท่อน"></textarea>
+        <div class="ctrl"><button class="btn" id="startBtn">▶ เริ่มซ้อม</button></div>
+      </div>
+
+      <!-- running -->
+      <div class="card hidden" id="runCard">
+        <div class="ring-wrap">
+          <svg viewBox="0 0 220 220">
+            <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b6bff"/><stop offset="1" stop-color="#ff5fa2"/></linearGradient></defs>
+            <circle class="ring-bg" cx="110" cy="110" r="96" fill="none" stroke-width="12"/>
+            <circle class="ring-fg" id="ringFg" cx="110" cy="110" r="96" fill="none" stroke-width="12" stroke-linecap="round" stroke-dasharray="603.19" stroke-dashoffset="603.19"/>
+          </svg>
+          <div class="ring-center">
+            <div class="clock" id="clock">00:00:00</div>
+            <small id="runState">กำลังซ้อม…</small>
+            <small id="ringSub"></small>
+          </div>
+        </div>
+        <div class="plan-box">
+          <small id="runInst">🎸</small>
+          <small>วันนี้จะซ้อม</small><p id="runPlan"></p>
+          <small>ประโยชน์ที่หวัง</small><p id="runBenefit"></p>
+        </div>
+        <div class="ctrl">
+          <button class="btn ghost" id="pauseBtn">⏸ พัก</button>
+          <button class="btn" id="stopBtn" style="background:linear-gradient(135deg,#ff5fa2,#ff8a5f)">■ หยุด</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SUMMARY ===== -->
+    <section id="v-summary" class="view hidden">
+      <div class="top">
+        <div class="hello"><small>7 วันล่าสุด</small><h1>สรุปผลการซ้อม</h1></div>
+        <button class="btn ghost" id="exportBtn" style="padding:10px 14px">⬇ CSV</button>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat"><div class="e">⏱</div><b id="sTotal">0</b><span>เวลารวม</span></div>
+        <div class="stat"><div class="e">📈</div><b id="sAvg">0</b><span>เฉลี่ยต่อวัน</span></div>
+        <div class="stat"><div class="e">📅</div><b id="sDays">0/7</b><span>วันที่ได้ซ้อม</span></div>
+        <div class="stat"><div class="e">😊</div><b id="sRate">–</b><span>ความพึงพอใจเฉลี่ย</span></div>
+      </div>
+
+      <div class="card">
+        <div class="chart-top">
+          <h2 style="margin:0">📊 กราฟเวลาซ้อม 7 วัน</h2>
+          <div class="legend">
+            <span><i style="background:var(--bar)"></i>ซ้อมแล้ว</span>
+            <span><i style="background:var(--accent)"></i>วันนี้</span>
+            <span><i style="background:var(--good)"></i>ถึงเป้า</span>
+          </div>
+        </div>
+        <div class="chart-box">
+          <svg id="chart" viewBox="0 0 640 300" role="img" aria-label="กราฟเวลาซ้อม 7 วัน"></svg>
+          <div class="tip" id="tip"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>🗓 ตารางรวมผลรายวัน</h2>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>วัน</th><th>ครั้ง</th><th>เวลารวม</th><th>เทียบเป้าหมาย</th><th>เครื่องดนตรี</th></tr></thead>
+          <tbody id="dayBody"></tbody>
+          <tfoot id="dayFoot"></tfoot>
+        </table></div>
+      </div>
+
+      <div class="card">
+        <h2>📒 บันทึกรายครั้ง (7 วัน)</h2>
+        <div class="tbl-wrap"><table style="min-width:860px">
+          <thead><tr><th>วันที่</th><th>เครื่อง</th><th>ตั้งใจซ้อม</th><th>ประโยชน์ที่หวัง</th><th>สิ่งที่ได้จริง</th><th>ทำตามแผน</th><th>เวลา</th><th>😊</th><th></th></tr></thead>
+          <tbody id="sessBody"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ===== PROFILE ===== -->
+    <section id="v-profile" class="view hidden">
+      <div class="top"><div class="hello"><small>ข้อมูลของคุณ</small><h1>โปรไฟล์</h1></div></div>
+      <div class="card">
+        <h2>👤 ข้อมูลพื้นฐาน</h2>
+        <label class="f" for="eName">ชื่อเล่น</label>
+        <input class="inp" id="eName" maxlength="24">
+        <label class="f" for="eWhy">เหตุผลที่ซ้อมดนตรี</label>
+        <textarea class="inp" id="eWhy" maxlength="140"></textarea>
+        <label class="f">ระดับ</label>
+        <div class="seg" id="eLevel"></div>
+        <label class="f">เครื่องดนตรี</label>
+        <div class="chips" id="eInst"></div>
+        <div class="row" style="flex-wrap:nowrap;margin-top:10px">
+          <input class="inp" id="eCustom" maxlength="24" placeholder="เพิ่มเครื่องดนตรี">
+          <button class="btn ghost" id="eAdd" style="flex:none;min-width:0">เพิ่ม</button>
+        </div>
+        <label class="f" for="eGoal">เป้าหมายต่อวัน (นาที)</label>
+        <input class="inp" type="number" id="eGoal" min="5" max="600" step="5">
+        <div class="ctrl"><button class="btn" id="saveProfile">บันทึกการเปลี่ยนแปลง</button></div>
+      </div>
+      <div class="card">
+        <h2>⚙️ ตั้งค่าอื่น ๆ</h2>
+        <div class="row">
+          <button class="btn ghost" id="themeBtn">◐ สลับโหมดสว่าง/มืด</button>
+          <button class="btn danger" id="resetBtn">🗑 ล้างข้อมูลทั้งหมด</button>
+        </div>
+        <p class="muted" style="font-size:.8rem;margin:14px 0 0">ข้อมูลเก็บไว้ในเบราว์เซอร์เครื่องนี้ (localStorage) ไม่ซิงก์ข้ามอุปกรณ์</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom">
+    <button class="nav-btn" data-nav="practice"><span class="ic">🎧</span>ซ้อม</button>
+    <button class="nav-btn" data-nav="summary"><span class="ic">📊</span>สรุปผล</button>
+    <button class="nav-btn" data-nav="profile"><span class="ic">👤</span>โปรไฟล์</button>
+  </nav>
+</div>
+
+<!-- ================= REFLECTION SHEET ================= -->
+<div class="overlay hidden" id="reflect">
+  <div class="sheet">
+    <h2>🎉 ซ้อมเสร็จแล้ว!</h2>
+    <p class="muted" style="margin:0">ตอบคำถามสั้น ๆ เพื่อบันทึกผลการซ้อมครั้งนี้</p>
+    <div class="recap">
+      <div class="mini"><b id="rcTime">–</b><span>เวลาที่ซ้อม</span></div>
+      <div class="mini"><b id="rcInst">–</b><span>เครื่องดนตรี</span></div>
+    </div>
+    <div class="plan-box" style="margin-top:8px">
+      <small>ที่ตั้งใจจะซ้อม</small><p id="rcPlan"></p>
+      <small>ประโยชน์ที่หวังไว้</small><p id="rcBenefit"></p>
+    </div>
+    <label class="f" for="rLearned">ท่านได้อะไรบ้างจากการซ้อมครั้งนี้ <span style="color:var(--accent2)">*</span></label>
+    <textarea class="inp" id="rLearned" maxlength="300" placeholder="เช่น เปลี่ยนคอร์ด G→C ได้เร็วขึ้น เข้าใจจังหวะท่อน Chorus มากขึ้น"></textarea>
+    <label class="f">ทำได้ตามที่ตั้งใจไหม</label>
+    <div class="seg" id="rMet"></div>
+    <label class="f">ความพึงพอใจกับการซ้อมครั้งนี้</label>
+    <div class="faces" id="rFaces"></div>
+    <label class="f" for="rImprove">ครั้งหน้าอยากปรับปรุงอะไร (ไม่บังคับ)</label>
+    <input class="inp" id="rImprove" maxlength="160" placeholder="เช่น ซ้อมช้า ๆ ด้วยเมตรอนอม">
+    <div class="ctrl">
+      <button class="btn danger" id="rDiscard" style="flex:none;padding:16px 18px">ทิ้ง</button>
+      <button class="btn" id="rSave">💾 บันทึกผล</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const $$ = s => [...document.querySelectorAll(s)];
+  const K = { profile:'ps.profile.v1', sessions:'ps.sessions.v1', timer:'ps.timer.v1', pending:'ps.pending.v1', theme:'ps.theme.v1' };
+  const load = (k,d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } };
+  const save = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+  const del = k => { try { localStorage.removeItem(k); } catch {} };
+
+  const INSTRUMENTS = [
+    ['🎸','กีตาร์'],['🎹','เปียโน'],['🥁','กลอง'],['🎻','ไวโอลิน'],['🎤','ร้องเพลง'],['🎷','แซกโซโฟน'],
+    ['🎺','ทรัมเป็ต'],['🪕','อูคูเลเล่'],['🎸','เบส'],['🪈','ขลุ่ย/ฟลุต'],['🎹','คีย์บอร์ด'],['🎵','อื่น ๆ']
+  ];
+  const ICON = Object.fromEntries(INSTRUMENTS.map(([i,n])=>[n,i]));
+  const iconOf = n => ICON[n] || '🎵';
+  const LEVELS = ['เริ่มต้น','ปานกลาง','ขั้นสูง'];
+  const MET = ['ครบตามแผน','บางส่วน','ไม่ได้ตามแผน'];
+  const FACES = [['😣','แย่'],['😕','พอใช้'],['🙂','ดี'],['😄','ดีมาก'],['🤩','สุดยอด']];
+  const DAYS = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+  const MONTHS = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+  let profile = load(K.profile, null);
+  let sessions = load(K.sessions, []);
+  let timer = load(K.timer, null);   // {running,startedAt,accumulated,instrument,plan,benefit}
+  let pending = load(K.pending, null);
+  let theme = load(K.theme, 'dark');
+  let view = 'practice';
+  let tick = null;
+
+  /* ---------- helpers ---------- */
+  const pad = n => String(n).padStart(2,'0');
+  const dateKey = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const parseKey = k => { const [y,m,d] = k.split('-').map(Number); return new Date(y,m-1,d); };
+  const fmtHMS = s => `${pad(Math.floor(s/3600))}:${pad(Math.floor(s%3600/60))}:${pad(s%60)}`;
+  const fmtDur = s => {
+    if (s < 60) return `${s} วิ`;
+    const m = Math.round(s/60);
+    if (m < 60) return `${m} นาที`;
+    return `${Math.floor(m/60)} ชม.${m%60 ? ' '+(m%60)+' น.' : ''}`;
+  };
+  const fmtShort = k => { const d = parseKey(k); return `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`; };
+  const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2400); }
+
+  function applyTheme(){
+    document.documentElement.setAttribute('data-theme', theme);
+    document.querySelector('meta[name=theme-color]').setAttribute('content', theme==='dark' ? '#0f0c1d' : '#f5f3ff');
+  }
+
+  /* ---------- onboarding ---------- */
+  let ob = { step:0, name:'', why:'', instruments:[], level:'เริ่มต้น', goal:30 };
+
+  function obRender(){
+    $$('.ob-step').forEach(s => s.classList.toggle('hidden', +s.dataset.step !== ob.step));
+    $$('#obDots i').forEach((d,i)=>d.classList.toggle('on', i<=ob.step));
+    $('obBack').classList.toggle('hidden', ob.step===0);
+    $('obNext').textContent = ob.step===2 ? 'เริ่มใช้งาน 🚀' : 'ถัดไป';
+    $('obGoal').textContent = ob.goal;
+    // instruments
+    const all = [...INSTRUMENTS.slice(0,-1), ...ob.instruments.filter(n=>!ICON[n]).map(n=>['🎵',n])];
+    $('obInst').innerHTML = all.map(([i,n]) => `<div class="inst ${ob.instruments.includes(n)?'on':''}" data-inst="${esc(n)}"><b>${i}</b>${esc(n)}</div>`).join('');
+    $('obLevel').innerHTML = LEVELS.map(l=>`<div class="chip ${ob.level===l?'on':''}" data-level="${l}">${l}</div>`).join('');
+    $('obGoalQuick').innerHTML = [15,30,45,60,90].map(g=>`<div class="chip ${ob.goal===g?'on':''}" data-gq="${g}">${g} น.</div>`).join('');
+  }
+  $('obInst').addEventListener('click', e => {
+    const el = e.target.closest('[data-inst]'); if(!el) return;
+    const n = el.dataset.inst;
+    ob.instruments = ob.instruments.includes(n) ? ob.instruments.filter(x=>x!==n) : [...ob.instruments, n];
+    obRender();
+  });
+  function obAddCustom(){
+    const v = $('obCustom').value.trim(); if(!v) return;
+    if(!ob.instruments.includes(v)) ob.instruments.push(v);
+    $('obCustom').value=''; obRender();
+  }
+  $('obAdd').onclick = obAddCustom;
+  $('obCustom').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); obAddCustom(); }});
+  $('obLevel').addEventListener('click', e => { const el=e.target.closest('[data-level]'); if(el){ ob.level=el.dataset.level; obRender(); }});
+  $('obGoalQuick').addEventListener('click', e => { const el=e.target.closest('[data-gq]'); if(el){ ob.goal=+el.dataset.gq; obRender(); }});
+  $$('.goal-pick .round').forEach(b => b.onclick = () => { ob.goal = Math.max(5, Math.min(600, ob.goal + +b.dataset.g)); obRender(); });
+  $('obBack').onclick = () => { ob.step--; obRender(); };
+  $('obNext').onclick = () => {
+    if (ob.step===0){
+      ob.name = $('obName').value.trim();
+      if(!ob.name) return toast('กรุณาใส่ชื่อเล่นก่อนนะ');
+    }
+    if (ob.step===1 && !ob.instruments.length) return toast('เลือกเครื่องดนตรีอย่างน้อย 1 อย่าง');
+    if (ob.step<2){ ob.step++; obRender(); return; }
+    profile = { name:ob.name, why:ob.why, instruments:ob.instruments, level:ob.level, goal:ob.goal, createdAt:Date.now() };
+    save(K.profile, profile);
+    boot();
+  };
+
+  /* ---------- navigation ---------- */
+  function go(v){
+    view = v;
+    $$('.view').forEach(s => s.classList.toggle('hidden', s.id !== 'v-'+v));
+    $$('[data-nav]').forEach(b => b.classList.toggle('active', b.dataset.nav===v));
+    if (v==='summary') renderSummary();
+    if (v==='profile') renderProfile();
+    if (v==='practice') renderPractice();
+    window.scrollTo({top:0});
+  }
+  $$('[data-nav]').forEach(b => b.onclick = () => go(b.dataset.nav));
+
+  /* ---------- aggregates ---------- */
+  function last7(){
+    const out=[]; const t=new Date(); t.setHours(0,0,0,0);
+    for(let i=6;i>=0;i--){ const d=new Date(t); d.setDate(t.getDate()-i); out.push({key:dateKey(d), d, secs:0, count:0, insts:new Set(), isToday:i===0, list:[]}); }
+    const map=Object.fromEntries(out.map(o=>[o.key,o]));
+    for(const s of sessions){ const o=map[s.date]; if(o){ o.secs+=s.seconds; o.count++; o.insts.add(s.instrument); o.list.push(s); } }
+    return out;
+  }
+  function todaySecs(){ const k=dateKey(new Date()); return sessions.filter(s=>s.date===k).reduce((a,s)=>a+s.seconds,0); }
+  function streak(){
+    const set=new Set(sessions.map(s=>s.date)); const d=new Date(); d.setHours(0,0,0,0);
+    if(!set.has(dateKey(d))) d.setDate(d.getDate()-1);
+    let n=0; while(set.has(dateKey(d))){ n++; d.setDate(d.getDate()-1); } return n;
+  }
+
+  /* ---------- practice view ---------- */
+  const elapsedMs = () => timer ? timer.accumulated + (timer.running ? Date.now()-timer.startedAt : 0) : 0;
+  const CIRC = 2*Math.PI*96;
+
+  function renderPractice(){
+    const now=new Date();
+    $('dateLabel').textContent = `วัน${['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'][now.getDay()]}ที่ ${now.getDate()} ${MONTHS[now.getMonth()]}`;
+    const h = now.getHours();
+    $('helloTxt').textContent = `${h<12?'อรุณสวัสดิ์':h<17?'สวัสดีตอนบ่าย':'สวัสดีตอนเย็น'}, ${profile.name} 👋`;
+    $('avatar').textContent = iconOf(profile.instruments[0]);
+    $('tGoal').textContent = `${profile.goal} น.`;
+    $('tStreak').textContent = `${streak()} 🔥`;
+    const sel = $('pInst'); const keep = sel.value;
+    sel.innerHTML = profile.instruments.map(n=>`<option value="${esc(n)}">${iconOf(n)} ${esc(n)}</option>`).join('');
+    if (keep && profile.instruments.includes(keep)) sel.value = keep;
+
+    const active = !!timer;
+    $('planCard').classList.toggle('hidden', active);
+    $('runCard').classList.toggle('hidden', !active);
+    if (active){
+      $('runInst').textContent = `${iconOf(timer.instrument)} ${timer.instrument}`;
+      $('runPlan').textContent = timer.plan; $('runBenefit').textContent = timer.benefit;
+      $('pauseBtn').textContent = timer.running ? '⏸ พัก' : '▶ ต่อ';
+    }
+    renderClock();
+  }
+  function renderClock(){
+    const ms = elapsedMs(), s = Math.floor(ms/1000);
+    const tod = todaySecs() + s;
+    $('tToday').textContent = `${Math.round(tod/60)} น.`;
+    if (!timer){ document.title='Practice Studio – บันทึกการซ้อมดนตรี'; return; }
+    $('clock').textContent = fmtHMS(s);
+    $('clock').classList.toggle('run', timer.running);
+    $('runState').textContent = timer.running ? 'กำลังซ้อม…' : 'พักอยู่';
+    $('runState').classList.toggle('pulse', timer.running);
+    const pct = Math.min(1, tod/(profile.goal*60));
+    $('ringFg').style.strokeDashoffset = CIRC*(1-pct);
+    $('ringSub').textContent = `วันนี้ ${Math.round(tod/60)}/${profile.goal} น. (${Math.round(pct*100)}%)`;
+    document.title = `${fmtHMS(s)} · Practice Studio`;
+  }
+  function loop(){ clearInterval(tick); tick=setInterval(renderClock,250); }
+
+  $('startBtn').onclick = () => {
+    const plan=$('pPlan').value.trim(), benefit=$('pBenefit').value.trim();
+    if(!plan) return toast('กรุณาเขียนว่าวันนี้จะซ้อมอะไร');
+    if(!benefit) return toast('กรุณาเขียนประโยชน์ที่คาดว่าจะได้รับ');
+    timer = { running:true, startedAt:Date.now(), accumulated:0, instrument:$('pInst').value, plan, benefit };
+    save(K.timer, timer);
+    $('pPlan').value=''; $('pBenefit').value='';
+    loop(); renderPractice();
+  };
+  $('pauseBtn').onclick = () => {
+    if(!timer) return;
+    if(timer.running){ timer.accumulated += Date.now()-timer.startedAt; timer.running=false; timer.startedAt=0; }
+    else { timer.running=true; timer.startedAt=Date.now(); }
+    save(K.timer, timer); renderPractice();
+  };
+  $('stopBtn').onclick = () => {
+    if(!timer) return;
+    const secs = Math.floor(elapsedMs()/1000);
+    pending = { seconds:secs, instrument:timer.instrument, plan:timer.plan, benefit:timer.benefit, date:dateKey(new Date()) };
+    save(K.pending, pending);
+    timer = null; del(K.timer); clearInterval(tick);
+    renderPractice(); openReflect();
+  };
+
+  /* ---------- reflection ---------- */
+  let rf = { met:'ครบตามแผน', rating:0 };
+  function openReflect(){
+    if(!pending) return;
+    rf = { met:'ครบตามแผน', rating:0 };
+    $('rcTime').textContent = fmtDur(pending.seconds);
+    $('rcInst').textContent = `${iconOf(pending.instrument)} ${pending.instrument}`;
+    $('rcPlan').textContent = pending.plan; $('rcBenefit').textContent = pending.benefit;
+    $('rLearned').value=''; $('rImprove').value='';
+    renderReflectChoices();
+    $('reflect').classList.remove('hidden');
+  }
+  function renderReflectChoices(){
+    $('rMet').innerHTML = MET.map(m=>`<div class="chip ${rf.met===m?'on':''}" data-met="${m}">${m}</div>`).join('');
+    $('rFaces').innerHTML = FACES.map(([f,l],i)=>`<div class="face ${rf.rating===i+1?'on':''}" data-r="${i+1}">${f}<small>${l}</small></div>`).join('');
+  }
+  $('rMet').addEventListener('click', e=>{ const el=e.target.closest('[data-met]'); if(el){ rf.met=el.dataset.met; renderReflectChoices(); }});
+  $('rFaces').addEventListener('click', e=>{ const el=e.target.closest('[data-r]'); if(el){ rf.rating=+el.dataset.r; renderReflectChoices(); }});
+  $('rSave').onclick = () => {
+    const learned = $('rLearned').value.trim();
+    if(!learned) return toast('กรุณาเล่าว่าได้อะไรจากการซ้อมครั้งนี้');
+    if(!rf.rating) return toast('กรุณาเลือกระดับความพึงพอใจ');
+    sessions.push({ id:uid(), ...pending, learned, improve:$('rImprove').value.trim(), met:rf.met, rating:rf.rating, createdAt:Date.now() });
+    save(K.sessions, sessions);
+    pending=null; del(K.pending);
+    $('reflect').classList.add('hidden');
+    toast('บันทึกผลเรียบร้อย 🎉');
+    go('summary');
+  };
+  $('rDiscard').onclick = () => {
+    if(confirm('ต้องการทิ้งการซ้อมรอบนี้โดยไม่บันทึกใช่ไหม?')){
+      pending=null; del(K.pending); $('reflect').classList.add('hidden'); renderPractice();
+    }
+  };
+
+  /* ---------- summary ---------- */
+  function renderSummary(){
+    const data = last7();
+    drawChart(data);
+    const total = data.reduce((a,o)=>a+o.secs,0);
+    const days = data.filter(o=>o.secs>0).length;
+    $('sTotal').textContent = total>=3600 ? `${(total/3600).toFixed(1)} ชม.` : `${Math.round(total/60)} น.`;
+    $('sAvg').textContent = `${Math.round(total/60/7)} น.`;
+    $('sDays').textContent = `${days}/7`;
+    const rated = data.flatMap(o=>o.list).filter(s=>s.rating);
+    $('sRate').textContent = rated.length ? `${FACES[Math.round(rated.reduce((a,s)=>a+s.rating,0)/rated.length)-1][0]} ${(rated.reduce((a,s)=>a+s.rating,0)/rated.length).toFixed(1)}` : '–';
+
+    const goalS = profile.goal*60;
+    $('dayBody').innerHTML = [...data].reverse().map(o => {
+      const pct = Math.round(o.secs/goalS*100);
+      return `<tr>
+        <td><b>${o.isToday?'วันนี้':fmtShort(o.key)}</b>${o.isToday?`<div class="muted" style="font-size:.74rem">${fmtShort(o.key)}</div>`:''}</td>
+        <td>${o.count||'–'}</td>
+        <td>${o.secs?fmtDur(o.secs):'–'}</td>
+        <td><div class="pbar ${pct>=100?'ok':''}"><i style="width:${Math.min(100,pct)}%"></i></div><span class="muted" style="font-size:.74rem">${pct}%${pct>=100?' ✓':''}</span></td>
+        <td>${[...o.insts].map(n=>`<span class="tag">${iconOf(n)} ${esc(n)}</span>`).join(' ')||'–'}</td>
+      </tr>`;
+    }).join('');
+    const cnt = data.reduce((a,o)=>a+o.count,0);
+    $('dayFoot').innerHTML = `<tr><td>รวม 7 วัน</td><td>${cnt}</td><td>${fmtDur(total)}</td><td>เฉลี่ย ${Math.round(total/60/7)} น./วัน</td><td>ซ้อมครบเป้า ${data.filter(o=>o.secs>=goalS).length} วัน</td></tr>`;
+
+    const list = data.flatMap(o=>o.list).sort((a,b)=>b.date.localeCompare(a.date)||b.createdAt-a.createdAt);
+    $('sessBody').innerHTML = list.length ? list.map(s=>`<tr>
+      <td style="white-space:nowrap">${fmtShort(s.date)}</td>
+      <td><span class="tag">${iconOf(s.instrument)} ${esc(s.instrument)}</span></td>
+      <td class="cell-txt">${esc(s.plan)}</td>
+      <td class="cell-txt">${esc(s.benefit)}</td>
+      <td class="cell-txt">${esc(s.learned)}${s.improve?`<div class="muted" style="font-size:.76rem;margin-top:4px">ครั้งหน้า: ${esc(s.improve)}</div>`:''}</td>
+      <td><span class="tag">${esc(s.met||'–')}</span></td>
+      <td style="white-space:nowrap"><b>${fmtDur(s.seconds)}</b></td>
+      <td style="font-size:1.3rem">${s.rating?FACES[s.rating-1][0]:'–'}</td>
+      <td><button class="del" data-del="${s.id}" title="ลบ" aria-label="ลบ">✕</button></td>
+    </tr>`).join('') : `<tr><td colspan="9"><div class="empty"><b>🎼</b>ยังไม่มีบันทึกใน 7 วันนี้ ไปที่หน้า “ซ้อม” แล้วกดเริ่มได้เลย</div></td></tr>`;
+  }
+  $('sessBody').addEventListener('click', e => {
+    const b=e.target.closest('[data-del]'); if(!b) return;
+    if(!confirm('ลบบันทึกนี้ใช่ไหม?')) return;
+    sessions = sessions.filter(s=>s.id!==b.dataset.del); save(K.sessions, sessions); renderSummary(); toast('ลบแล้ว');
+  });
+
+  function drawChart(data){
+    const svg=$('chart'), W=640, H=300, pl=42, pr=12, pt=26, pb=48, iw=W-pl-pr, ih=H-pt-pb;
+    const goal=profile.goal, mins=data.map(o=>o.secs/60);
+    let maxV=Math.max(goal,...mins)*1.15;
+    const step=maxV>240?60:maxV>120?30:maxV>60?15:10; maxV=Math.ceil(maxV/step)*step;
+    const y=v=>pt+ih-(v/maxV)*ih, bw=iw/7;
+    const cs=getComputedStyle(document.documentElement), c=n=>cs.getPropertyValue(n).trim();
+    let g=`<defs>
+      <linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a58bff"/><stop offset="1" stop-color="#7a58f5"/></linearGradient>
+      <linearGradient id="gT" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff7ab5"/><stop offset="1" stop-color="#8b6bff"/></linearGradient>
+      <linearGradient id="gG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5eead4"/><stop offset="1" stop-color="#22b07d"/></linearGradient>
+    </defs>`;
+    for(let v=0;v<=maxV;v+=step){
+      g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="${c('--line')}"/>
+          <text x="${pl-8}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="${c('--muted')}">${v}</text>`;
+    }
+    g+=`<text x="${pl-8}" y="${pt-12}" text-anchor="end" font-size="10" fill="${c('--muted')}">นาที</text>`;
+    data.forEach((o,i)=>{
+      const m=o.secs/60, x=pl+i*bw+bw*.17, w=bw*.66, h=Math.max(m>0?4:0,(m/maxV)*ih);
+      const fill = m>=goal ? 'url(#gG)' : o.isToday ? 'url(#gT)' : 'url(#gA)';
+      g+=`<g class="bar" data-i="${i}" style="cursor:pointer">
+        <rect x="${pl+i*bw}" y="${pt}" width="${bw}" height="${ih+pb}" fill="transparent"/>
+        <rect x="${x}" y="${y(0)-h}" width="${w}" height="${h}" rx="9" fill="${fill}" opacity="${o.isToday||m>=goal?1:.85}">
+          <animate attributeName="height" from="0" to="${h}" dur=".5s" fill="freeze"/>
+          <animate attributeName="y" from="${y(0)}" to="${y(0)-h}" dur=".5s" fill="freeze"/>
+        </rect>
+        ${m>0?`<text x="${x+w/2}" y="${y(0)-h-7}" text-anchor="middle" font-size="11" font-weight="700" fill="${c('--text')}">${Math.round(m)}</text>`:''}
+        <text x="${x+w/2}" y="${H-pb+19}" text-anchor="middle" font-size="12" font-weight="${o.isToday?800:500}" fill="${o.isToday?c('--accent2'):c('--text')}">${o.isToday?'วันนี้':DAYS[o.d.getDay()]}</text>
+        <text x="${x+w/2}" y="${H-pb+34}" text-anchor="middle" font-size="10" fill="${c('--muted')}">${o.d.getDate()} ${MONTHS[o.d.getMonth()]}</text>
+      </g>`;
+    });
+    g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(goal)}" y2="${y(goal)}" stroke="${c('--warn')}" stroke-width="1.6" stroke-dasharray="6 5"/>
+        <text x="${W-pr}" y="${y(goal)-6}" text-anchor="end" font-size="10.5" font-weight="700" fill="${c('--warn')}">เป้าหมาย ${goal} น.</text>`;
+    svg.innerHTML=g;
+    const tip=$('tip');
+    svg.querySelectorAll('.bar').forEach(el=>{
+      const show=()=>{
+        const i=+el.dataset.i, o=data[i], r=svg.getBoundingClientRect(), box=svg.parentElement.getBoundingClientRect();
+        tip.innerHTML=`${o.isToday?'วันนี้ · ':''}${fmtShort(o.key)}<br><b>${o.secs?fmtDur(o.secs):'ไม่ได้ซ้อม'}</b>${o.count?` · ${o.count} ครั้ง`:''}`;
+        tip.style.left=((pl+i*bw+bw/2)/W*r.width+(r.left-box.left))+'px';
+        tip.style.top=Math.max(y(o.secs/60)/H*r.height,44)+'px'; tip.style.opacity=1;
+      };
+      el.addEventListener('mouseenter',show); el.addEventListener('click',show);
+      el.addEventListener('mouseleave',()=>tip.style.opacity=0);
+    });
+  }
+
+  /* ---------- profile ---------- */
+  let edit = null;
+  function renderProfile(){
+    if(!edit) edit = { instruments:[...profile.instruments], level:profile.level };
+    $('eName').value = profile.name; $('eWhy').value = profile.why||''; $('eGoal').value = profile.goal;
+    renderEditChips();
+  }
+  function renderEditChips(){
+    $('eLevel').innerHTML = LEVELS.map(l=>`<div class="chip ${edit.level===l?'on':''}" data-el="${l}">${l}</div>`).join('');
+    const all = [...new Set([...INSTRUMENTS.slice(0,-1).map(x=>x[1]), ...edit.instruments])];
+    $('eInst').innerHTML = all.map(n=>`<div class="chip ${edit.instruments.includes(n)?'on':''}" data-ei="${esc(n)}">${iconOf(n)} ${esc(n)}</div>`).join('');
+  }
+  $('eLevel').addEventListener('click', e=>{ const el=e.target.closest('[data-el]'); if(el){ edit.level=el.dataset.el; renderEditChips(); }});
+  $('eInst').addEventListener('click', e=>{
+    const el=e.target.closest('[data-ei]'); if(!el) return; const n=el.dataset.ei;
+    edit.instruments = edit.instruments.includes(n) ? edit.instruments.filter(x=>x!==n) : [...edit.instruments,n]; renderEditChips();
+  });
+  function eAddCustom(){ const v=$('eCustom').value.trim(); if(!v) return; if(!edit.instruments.includes(v)) edit.instruments.push(v); $('eCustom').value=''; renderEditChips(); }
+  $('eAdd').onclick=eAddCustom;
+  $('eCustom').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); eAddCustom(); }});
+  $('saveProfile').onclick = () => {
+    const name=$('eName').value.trim();
+    if(!name) return toast('กรุณาใส่ชื่อเล่น');
+    if(!edit.instruments.length) return toast('เลือกเครื่องดนตรีอย่างน้อย 1 อย่าง');
+    profile = { ...profile, name, why:$('eWhy').value.trim(), level:edit.level, instruments:edit.instruments,
+      goal:Math.max(5,Math.min(600,parseInt($('eGoal').value,10)||30)) };
+    save(K.profile, profile); edit=null; toast('บันทึกโปรไฟล์แล้ว ✓'); renderProfile();
+  };
+  $('themeBtn').onclick = () => { theme = theme==='dark'?'light':'dark'; save(K.theme, theme); applyTheme(); if(view==='summary') renderSummary(); };
+  $('resetBtn').onclick = () => {
+    if(confirm('ล้างข้อมูลทั้งหมด (โปรไฟล์และบันทึกการซ้อม) ใช่ไหม? ย้อนกลับไม่ได้')){
+      [K.profile,K.sessions,K.timer,K.pending].forEach(del); location.reload();
+    }
+  };
+  $('exportBtn').onclick = () => {
+    if(!sessions.length) return toast('ยังไม่มีข้อมูลให้ส่งออก');
+    const rows=[['วันที่','เครื่องดนตรี','นาที','ตั้งใจซ้อม','ประโยชน์ที่หวัง','สิ่งที่ได้จริง','ทำตามแผน','ความพึงพอใจ(1-5)','ครั้งหน้าปรับปรุง']];
+    [...sessions].sort((a,b)=>a.date.localeCompare(b.date)).forEach(s=>rows.push([s.date,s.instrument,(s.seconds/60).toFixed(1),s.plan,s.benefit,s.learned,s.met||'',s.rating||'',s.improve||'']));
+    const csv='\ufeff'+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+    a.download=`practice-studio-${dateKey(new Date())}.csv`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  };
+
+  /* ---------- boot ---------- */
+  function boot(){
+    applyTheme();
+    if(!profile){
+      $('app').classList.add('hidden'); $('onboard').classList.remove('hidden'); obRender(); return;
+    }
+    $('onboard').classList.add('hidden'); $('app').classList.remove('hidden');
+    go('practice');
+    if(timer && timer.running) loop();
+    if(pending) openReflect();
+  }
+  document.addEventListener('visibilitychange', () => { if(!document.hidden){ renderClock(); if(view==='summary') renderSummary(); }});
+  window.addEventListener('resize', () => { $('tip').style.opacity=0; });
+  boot();
+})();
+</script>
+</body>
+</html>
